@@ -2,7 +2,8 @@
 PA1_template 
 ===============================
 loading libararies...
-```{r setup}
+
+```r
 knitr::opts_chunk$set(echo=TRUE)
 library(dplyr)
 library(lattice)
@@ -17,16 +18,17 @@ This dataset includes the number of steps taken in 5 minute intervals each day o
  
  First, we read the data and load it to a variable (ofcourse, the WD has to be set to the location where the .csv is located)
  
-```{r}
+
+```r
 dataACT<-read.csv("activity.csv")
 ```
 
  **1.2 Change the type of the "date" column to Date type and group the data by date**
  
  Now we convert the date column to the Date format :
-```{r}
-dataACT$date<-as.Date(dataACT$date,"%Y-%m-%d")
 
+```r
+dataACT$date<-as.Date(dataACT$date,"%Y-%m-%d")
 ```
 
 
@@ -36,11 +38,38 @@ dataACT$date<-as.Date(dataACT$date,"%Y-%m-%d")
  **2.1 Calculate the total number of steps taken a day.**
  
  First, we use **dplyr** package to group the dataset by dates and calculate the total number of steps per day :
-```{r }
+
+```r
 by_data<-dataACT %>% group_by(date)
 head(by_data)
+```
+
+```
+## # A tibble: 6 x 3
+## # Groups:   date [1]
+##   steps       date interval
+##   <int>     <date>    <int>
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
+```r
 s<-aggregate(steps~date,by_data,sum,na.rm = TRUE )
 head(s)
+```
+
+```
+##         date steps
+## 1 2012-10-02   126
+## 2 2012-10-03 11352
+## 3 2012-10-04 12116
+## 4 2012-10-05 13294
+## 5 2012-10-06 15420
+## 6 2012-10-07 11015
 ```
 
 
@@ -48,23 +77,26 @@ head(s)
  
  Now we calculate the mean and median number of daily steps:
  
-```{r}
+
+```r
 s_mean<-mean(s$steps)
 s_median<-median(s$steps)
-        
 ```
 
 
-The mean of the total number of steps taken a day is `r s_mean` and the median of total number of steps taken a day is `r s_median`.
+The mean of the total number of steps taken a day is 1.0766189 &times; 10<sup>4</sup> and the median of total number of steps taken a day is 10765.
 
 
  **2.3 The histogram of the total number of steps taken a day is as follows:**
  
  Since we have calculated the total number of steps taken a day, we can construct the histogram of the total steps taken a day using the base plot system:
  
-```{r}
+
+```r
 hist(s$steps,col="orange",main="Histogram of Total Steps taken per day",xlab="Total Steps taken per day",cex.axis=1,cex.lab = 1)
 ```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png)
 
 
 
@@ -78,16 +110,19 @@ In this section, we categorize the dataset per interval groups. That way, we can
 
 We can calculate the mean number of steps of each interval group:
 
-```{r}
+
+```r
 by_data_mean<-aggregate(steps~interval,data=dataACT,FUN=mean,na.rm=TRUE)
 ```
 
 We then plot a line graph of the mean numebr of steps of each interval group across all days:
 
-```{r}
+
+```r
 plot(by_data_mean$interval,by_data_mean$steps,type='l', xlab = "5-minute Time Intervals ", ylab = "Mean number of steps ", main = "Average number of steps taken per interval group",  col = "brown")
-        
 ```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png)
 
 Looking at the plot we can observe that the largest number of steps occur between the interval 750 and 1000. In the next section we will see what is the interval that has maximum number of steps.
 
@@ -98,11 +133,16 @@ Looking at the plot we can observe that the largest number of steps occur betwee
 **3.2 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?**
 
 We can use **which.max** command to get the answer:
-```{r}
+
+```r
 by_data_mean[which.max(by_data_mean$steps),"interval"]
 ```
 
-The interval group, #`r by_data_mean[which.max(by_data_mean$steps),"interval"]` has the maximum average numebr of steps of `r by_data_mean[which.max(by_data_mean$steps),"steps"]` across all days recorded in the dataset.
+```
+## [1] 835
+```
+
+The interval group, #835 has the maximum average numebr of steps of 206.1698113 across all days recorded in the dataset.
 
 
 
@@ -112,11 +152,16 @@ The interval group, #`r by_data_mean[which.max(by_data_mean$steps),"interval"]` 
 
 We know that there are missing values(steps) in the dataset. The following will calculate the total number of rows that contain an NA.
 
-```{r}
+
+```r
 sum(!complete.cases(dataACT))
 ```
 
-The total number of missing values in the dataset are `r sum(!complete.cases(dataACT))`.
+```
+## [1] 2304
+```
+
+The total number of missing values in the dataset are 2304.
 
 
 
@@ -133,7 +178,8 @@ In the next section, you will see how that can be achived.
 Copied the original dataset stored in **dataACT** in to a new variable :
 
 
-```{r}
+
+```r
 c_data<-dataACT
 ```
 
@@ -149,13 +195,13 @@ The following lines would:
 
 
 
-```{r}
+
+```r
 for (i in 1:nrow(c_data)) {
   if (is.na(c_data[i,"steps"])) {
     c_data[i,"steps"] <- by_data_mean$steps[by_data_mean$interval ==    c_data$interval[i]]
                 }
     }
-
 ```
 
 
@@ -165,17 +211,20 @@ The dataset stored in **c_data** has the NAs replaced.
 
 
 
-```{r}
+
+```r
 hist(aggregate(steps~date,c_data,sum)$steps,col="orange",main="Histogram of Total Steps taken per day (on the imputed dataset)",xlab="Total Steps taken per day",cex.axis=1,cex.lab = 1)
 ```
 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png)
 
 
-The mean of the imputed dataset is `r mean(aggregate(steps~date,c_data,sum )$steps)`. 
 
-The mean of the imputed dataset is same as the mean original dataset `r s_mean`.
+The mean of the imputed dataset is 1.0766189 &times; 10<sup>4</sup>. 
 
-The median of the imputed dataset is `r median(aggregate(steps~date,c_data,sum )$steps)`. The median value of the imputed dataset has changed compared to the original  median `r s_median`.
+The mean of the imputed dataset is same as the mean original dataset 1.0766189 &times; 10<sup>4</sup>.
+
+The median of the imputed dataset is 1.0766189 &times; 10<sup>4</sup>. The median value of the imputed dataset has changed compared to the original  median 10765.
 
 
 
@@ -190,7 +239,8 @@ The median of the imputed dataset is `r median(aggregate(steps~date,c_data,sum )
 
 
 
-```{r}
+
+```r
 for (i in 1:nrow(c_data)) {
         c_data$dayName[i]<-ifelse(wday(as.Date(c_data$date[i]),label=TRUE) %in% c("Sat","Sun"),"weekend","weekday")
         }
@@ -202,11 +252,21 @@ The column dayName type is converted to be a factor type.
 
 
 
-```{r}
+
+```r
 c_data$dayName<-as.factor(c_data$dayName)
 
 head(c_data)
+```
 
+```
+##       steps       date interval dayName
+## 1 1.7169811 2012-10-01        0 weekday
+## 2 0.3396226 2012-10-01        5 weekday
+## 3 0.1320755 2012-10-01       10 weekday
+## 4 0.1509434 2012-10-01       15 weekday
+## 5 0.0754717 2012-10-01       20 weekday
+## 6 2.0943396 2012-10-01       25 weekday
 ```
 
 
@@ -214,10 +274,13 @@ head(c_data)
 **5.2 Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.**
 
 
-```{r}
+
+```r
 c_data_mean= aggregate(steps ~ interval + dayName, c_data, mean)
 xyplot(steps ~  interval|factor(dayName) , data = c_data_mean, aspect =1/2,
 type = "l")
 ```
+
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png)
 
 Looking at the plots , one can say the activity is distributed across the day over the weekends when compared to weekdays. One can assume, that when number of steps are less than 20 the person is sleeping. Based on that assumption, one can say the person sleeps more during weekends.
